@@ -1,7 +1,7 @@
-import Link from 'next/link'
-import Layout from '../components/Layout'
-import { createClient } from '@supabase/supabase-js'
-
+import Link from 'next/link';
+import Layout from '../components/Layout';
+import { createClient } from '@supabase/supabase-js';
+import { Button } from "reakit/Button";
 
 export async function getServerSideProps() {
   
@@ -16,15 +16,6 @@ export async function getServerSideProps() {
   //     id
   // `);
 
-  const { data, error } = await supabase
-  .from('todos')
-  .insert([
-    { task: 'maybeh?' },
-  ])
-
-
-  console.log('data', data, 'error', error);
-
   return {
     props: {}
   }
@@ -33,11 +24,9 @@ export async function getServerSideProps() {
 const IndexPage = ({props}) => (
   <Layout title="Home | Next.js + TypeScript Example">
     <h1>Giftable 🎄🎁 </h1>
-    <p>
-      <Link href="/about">
-        <a>About</a>
-      </Link>
-    </p>
+    <div>
+      <Button className="p-2 bg-purple-500 text-white rounded-md">Create List</Button>
+    </div>
   </Layout>
 )
 
