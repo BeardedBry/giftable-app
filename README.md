@@ -1,6 +1,6 @@
-# TypeScript Next.js example
+# Giftable
 
-This is a really simple project that shows the usage of Next.js with TypeScript.
+App for making gift lists and sharing it with friends.
 
 ## Deploy your own
 

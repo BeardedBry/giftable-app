@@ -8,14 +8,15 @@ type Props = {
 }
 
 const Layout = ({ children, title = 'This is the default title' }: Props) => (
-  <div className="h-100 w-[40rem] mx-auto">
+  <div className="h-100 w-[40rem] mx-auto mt-5">
     <Head>
-      <title>{title}</title>
+      <title>🎄🎁 Giftable 🎅🎁 - {title}</title>
       <meta charSet="utf-8" />
       <meta name="viewport" content="initial-scale=1.0, width=device-width" />
     </Head>
     <header>
-      <nav>
+    <h1 className='text-5xl mb-1 text-center'>🎄🎁 Giftable 🎅🎁 </h1>
+      <nav className='text-center my-3'>
         <Link href="/">
           <a>Home</a>
         </Link>{' '}
@@ -30,12 +31,12 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => (
         | <a href="/api/users">Users API</a>
       </nav>
     </header>
-    <div>
+    <div className='my-3'>
       {children}
     </div>
-    <footer className="bg-red-100">
+    <footer className="text-center">
       <hr />
-      <span>I'm here to stay (Footer)</span>
+      <span>&copy; Copyright {new Date().getFullYear()}</span>
     </footer>
   </div>
 )

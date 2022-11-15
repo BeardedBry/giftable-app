@@ -22,8 +22,7 @@ export async function getServerSideProps() {
 }
 
 const IndexPage = ({props}) => (
-  <Layout title="Home | Next.js + TypeScript Example">
-    <h1>Giftable 🎄🎁 </h1>
+  <Layout title="Home">
     <div>
       <Button className="p-2 bg-purple-500 text-white rounded-md">Create List</Button>
     </div>
