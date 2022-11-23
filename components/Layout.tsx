@@ -22,28 +22,25 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
       </Head>
       <header>
         <h1 className='text-5xl mb-1 text-center'>🎄🎁 Giftable 🎅🎁 </h1>
-        <nav className='text-center my-3'>
-          <Link href="/">
-            <a>Home</a>
-          </Link>{' '}
-          |{' '}
-          <Link href="/about">
-            <a>About</a>
-          </Link>{' '}
-          |{' '}
-          {!session ? (
+        {session ? (
+          <nav className='text-center my-3'>
             <Link href="/">
-              Sign In
-            </Link>
-          ) : (
+              <a>Profile</a>
+            </Link>{' '}
+            |{' '}
+            <Link href="/List">
+              <a>List</a>
+            </Link>{' '}
+            |{' '}
             <button onClick={() => supabase.auth.signOut()}>
               <a>Sign Out</a>
-            </button>)}
-          {/* <Link href="/users">
+            </button>
+            {/* <Link href="/users">
           <a>Users List</a>
-        </Link>{' '}
+          </Link>{' '}
         | <a href="/api/users">Users API</a> */}
-        </nav>
+          </nav>
+        ) : null}
       </header>
       <div className='my-3'>
         {children}
