@@ -28,8 +28,8 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
               <a>Profile</a>
             </Link>{' '}
             |{' '}
-            <Link href="/List">
-              <a>List</a>
+            <Link href="/lists">
+              <a>Lists</a>
             </Link>{' '}
             |{' '}
             <button onClick={() => supabase.auth.signOut()}>

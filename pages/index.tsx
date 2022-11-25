@@ -1,99 +1,38 @@
-import React from 'react';
-import Link from 'next/link';
 import Layout from '../components/Layout';
-import { Button } from "reakit/Button";
-import { Input } from "reakit/Input";
-import { Auth, ThemeMinimal } from '@supabase/auth-ui-react'
-
-import { useSession, useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import SignIn from '../components/SignIn';
-import { NewUser } from '../components/NewUser';
-import { useProfileData } from '../hooks/useProfileData';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
-export const getServerSideProps = () => {
+export const getServerSideProps = async (ctx) => {
+
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (session)
+    return {
+      redirect: {
+        destination: '/profile',
+        permanent: false,
+      },
+    }
+
   return {
     props: {
-      test: 'test'
-    }
+    },
   }
 }
 
 
-const IndexPage = ({ test }) => {
-
-  const session = useSession()
-  const supabase = useSupabaseClient()
-  const user = useUser();
-
-  const [loading, displayName, profileId] = useProfileData();
-
-  // console.log(session, supabase);
-
-  // React.useEffect(() => {
-  //   if (!session || !user) {
-  //     return;
-  //   }
-
-  //   async function getUserData() {
-
-  //     let { data, error } = await supabase
-  //       .from('users')
-  //       .select('*')
-  //       .eq('auth_user', user.id)
-
-  //     if (data[0]?.display_name) {
-  //       setUserData(data[0]);
-  //     } else if (error) {
-  //       setUserData(undefined);
-  //     }
-
-  //     console.log(error, data);
-  //     // setUserData(users);
-  //   }
-
-  //   getUserData();
-
-  // }, [session, user])
-
+const IndexPage = ( ) => {
 
   return (
     <Layout title="Home">
       <div className="container" style={{ padding: '20px 0 100px 0' }}>
-        {!session ? (
-          // <Auth
-          //   supabaseClient={supabase}
-          //   appearance={{
-          //     theme: ThemeMinimal,
-          //     variables: {
-          //       default: {
-          //         colors: {
-          //           brand: 'rgb(168 85 247)',
-          //           brandAccent: 'rgb(192 132 252)',
-          //         },
-          //         space: {
-          //           buttonPadding: '.5rem',
-          //           inputPadding: '.25rem'
-          //         }
-          //       },
-          //     },
-          //   }}
-          //   theme="light"
-          // />
+        <div className="text-center">
           <SignIn />
-        ) :
-          loading ? (
-            <></>
-          ) : (
-            displayName ? (
-              <p className="text-center text-xl">Welcome {displayName}!!</p>
-            ) : (
-              <>
-                <h2 className="text-center text-lg pb-3">Welcome new User!</h2>
-                <p>Enter desired username: </p>
-                <NewUser />
-              </>
-            )
-          )}
+        </div>
       </div>
     </Layout>
   )

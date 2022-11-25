@@ -9,7 +9,6 @@ const AddRequest = ({ id }) => {
 
     const supabase = useSupabaseClient()
     // const user = useUser()
-
     // console.log('user', user);
 
     const [name, setName] = useState("");

@@ -10,8 +10,12 @@ const useProfileData = () => {
   const [loading, setLoading] = React.useState(true)
   const [username, setUsername] = React.useState(null)
   const [userId, setUserId] = React.useState(null)
+  const [loadingError, setLodingError] = React.useState(null)
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
+    if(!user){
+      return;
+    }
     getProfile()
   }, [user])
 
@@ -37,13 +41,14 @@ const useProfileData = () => {
       }
     } catch (error) {
       // alert('Error loading user data!')
-      console.log(error)
+      setLodingError(error);
+      // console.log(error)
     } finally {
       setLoading(false)
     }
   }
 
-  return [loading, username, userId];
+  return [loading, username, userId, loadingError];
 
 }
 
