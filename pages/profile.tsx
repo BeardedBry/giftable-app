@@ -7,6 +7,7 @@ import { Spinner } from "../components/Spinner";
 
 import getProfile from '../utils/get-profile';
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 
 export const getServerSideProps = async (ctx) => {
@@ -27,6 +28,9 @@ export const getServerSideProps = async (ctx) => {
 
   // check if user is in users (profile) table.
   const userProfile = await getProfile(supabase, user.id)
+
+  console.log('userProfile ', userProfile);
+
 
   // console.log('userProfile', userProfile)
   // new user route
@@ -59,7 +63,9 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
   const supabase = useSupabaseClient();
   const user = useUser();
+  const router = useRouter();
   const [username, setUsername] = useState("");
+  const [groupsLoading, setGroupsLoading] = useState(true);
 
   useEffect(() => {
     if (!displayName) {
@@ -68,28 +74,41 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
     const readGroups = async () => {
 
-      let { data: group_to_profile, error: group_to_profile_error } = await supabase
+      // let { data: group_to_profile, error: group_to_profile_error } = await supabase
+      //   .from('group_to_profile')
+      //   .select('*').eq('profile', parseInt(profileId, 10))
+
+      // // console.log(group_to_profile);
+      // if (group_to_profile_error) {
+      //   console.error(group_to_profile_error);
+      // }
+
+      // if (!group_to_profile?.length) {
+      //   return null;
+      // }
+
+      // const groupIds = group_to_profile.map((g) => g.group)
+
+      // let { data: groups, error } = await supabase
+      //   .from('groups')
+      //   .select('*').in('id', groupIds);
+
+      // for now since we have only 1 group:
+      let { data: group_to_profile, error } = await supabase
         .from('group_to_profile')
-        .select('*').eq('profile', parseInt(profileId, 10))
+        .select('*')
 
-      console.log(group_to_profile);
-      console.error(group_to_profile_error);
+      const profileIds = group_to_profile.map((group) => group.profile);
 
-      if (!group_to_profile?.length) {
-        return null;
-      }
-
-      const groupIds = group_to_profile.map((g) => g.group)
-
-      console.log('groupIds', groupIds);
+      console.log('group_to_profile', group_to_profile);
+      console.log("profileIds", profileIds);
       
+      
+      // console.log('groups', groups, error);
 
-      let { data: groups, error } = await supabase
-      .from('groups')
-      .select('*').in('id', groupIds);
+      // const groupId = groups[0].id;
 
-      console.log('groups', groups, error);
-      return group_to_profile;
+      // return groups;
     }
 
     readGroups();
@@ -111,11 +130,10 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       ]);
 
     if (error) {
-      alert(error.message)
-      console.error(error.message);
-    }
+      console.error(error);
+    } 
+    router.reload();
   }
-
 
 
 
@@ -126,7 +144,7 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
           <div className="mx-auto w-72">
             <h2>Welcome New User!</h2>
             <p>Fill out some info below to get started</p>
-            <form onSubmit={createProfile} method="post" className="flex flex-col w-60 gap-2 mt-12">
+            <form onSubmit={createProfile} className="flex flex-col w-60 gap-2 mt-12">
               <label className="text-left" htmlFor="email">Desired Username:</label>
               <Input required className="border py-1" placeholder="username" id="username" name="username" onChange={(e => setUsername(e.target.value))} value={username} />
               <Button
@@ -148,6 +166,9 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
     <Layout title="Profile">
       <div className="container" style={{ padding: '20px 0 100px 0' }}>
         Welcome {displayName}!!
+        <hr className="my-6" />
+        <h3>Friends Lists</h3>
+        {groupsLoading ? <Spinner /> : <>data</>}
       </div>
     </Layout >
   )
