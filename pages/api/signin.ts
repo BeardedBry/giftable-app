@@ -23,6 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!data) return res.status(400).json({ data: 'invalid login' })
 
+    // register to users ("profile") table
+    
+
     // Valid Login
     // Sends a HTTP success code
     return res.redirect(200, '/profile');

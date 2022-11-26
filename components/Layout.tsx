@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useRouter } from 'next/router'
 
 type Props = {
   children?: ReactNode
@@ -12,6 +13,7 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
 
   const supabase = useSupabaseClient()
   const session = useSession()
+  const router = useRouter();
 
   return (
     <div className="px-3 md:px-0 h-100 max-w-[40rem] mx-auto mt-5">
@@ -32,7 +34,10 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
               <a>Lists</a>
             </Link>{' '}
             |{' '}
-            <button onClick={() => supabase.auth.signOut()}>
+            <button onClick={async () => {
+                await supabase.auth.signOut();
+                router.push("/");
+              }}>
               <a>Sign Out</a>
             </button>
             {/* <Link href="/users">

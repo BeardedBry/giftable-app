@@ -14,6 +14,8 @@ export const getServerSideProps = async (ctx) => {
         data: { session },
     } = await supabase.auth.getSession()
 
+    console.log(session)
+
     if (!session)
         return {
             redirect: {
@@ -29,26 +31,23 @@ export const getServerSideProps = async (ctx) => {
 
 const ListPage = ({ }) => {
 
-    const [loading, displayName, profileId] = useProfileData();
+    const [loadingList, displayName, profileId] = useProfileData();
 
     return (
         <Layout title="Home">
             <div className="my-6">
-                {loading ? (
+                <div className="flex flex-col gap-3">
+                    <h2 className="text-xl text-center">Friends Lists</h2>
+                </div>
+
+                <hr className="my-6" />
+                {loadingList ? (
                     <Spinner />
                 ) : (
-                    <div>
-                        <div className="flex flex-col gap-3">
-                            <h2 className="text-xl text-center">Friends Lists</h2>
-                        </div>
-
-                        <hr className="my-6" />
-
-                        <div className="flex flex-col gap-3">
-                            <h2 className="text-xl text-center">Your Wish List</h2>
-                            <div>
-                                <AddRequest id={profileId} />
-                            </div>
+                    <div className="flex flex-col gap-3">
+                        <h2 className="text-xl text-center">Your Wish List</h2>
+                        <div>
+                            <AddRequest id={profileId} />
                         </div>
                     </div>
                 )}

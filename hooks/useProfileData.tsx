@@ -12,19 +12,22 @@ const useProfileData = () => {
   const [userId, setUserId] = React.useState(null)
   const [loadingError, setLodingError] = React.useState(null)
 
-  React.useLayoutEffect(() => {
-    if(!user){
+  React.useEffect(() => {
+    if (!user || !supabase) {
+      return;
+    }
+    if (username) {
       return;
     }
     getProfile()
-  }, [user])
+  }, [user, username])
 
   async function getProfile() {
     try {
       setLoading(true)
       if (!user) throw new Error('No user')
 
-      let { data, error, status} = await supabase
+      let { data, error, status } = await supabase
         .from('users')
         .select('*')
         .eq('auth_user', user.id)
@@ -41,9 +44,10 @@ const useProfileData = () => {
       }
     } catch (error) {
       // alert('Error loading user data!')
-      setLodingError(error);
+      () => setLodingError(error);
       // console.log(error)
     } finally {
+      console.log('..finally');
       setLoading(false)
     }
   }
