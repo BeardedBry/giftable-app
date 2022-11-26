@@ -2,7 +2,7 @@
 export default async function getProfile(supabase, userId) {
     try {
         let { data, error, status } = await supabase
-            .from('users')
+            .from('profiles')
             .select('*')
             .eq('auth_user', userId)
             .single()
