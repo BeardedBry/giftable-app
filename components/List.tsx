@@ -49,8 +49,8 @@ const List = ({ props }: { props: Props }) => {
       <h2 className="text-xl text-center">{display_name}'s' Wish List</h2>
       <ul>
         {query.data?.map((request: Request, index) => (
-          <li key={request.id}>
-            {index + 1} <ListItem data={request} />
+          <li key={request.id} className="even:bg-slate-100 p-2 py-4">
+            <ListItem data={request} />
           </li>
         ))}
       </ul>
