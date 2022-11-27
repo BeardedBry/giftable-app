@@ -3,11 +3,15 @@ import Link from 'next/link'
 import Head from 'next/head'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
+import pkg from "../package.json";
+
 
 type Props = {
   children?: ReactNode
   title?: string
 }
+console.log("Giftable, App version", pkg.version);
+
 
 const Layout = ({ children, title = 'This is the default title' }: Props) => {
 
@@ -16,7 +20,7 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
   const router = useRouter();
 
   return (
-    <div className="px-3 md:px-0 h-100 max-w-[40rem] mx-auto mt-5">
+    <div className="px-3 sm:px-6 h-100 max-w-[60rem] mx-auto mt-5">
       <Head>
         <title>🎄🎁 Giftable 🎅🎁 - {title}</title>
         <meta charSet="utf-8" />
@@ -30,14 +34,14 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
               <a>Profile</a>
             </Link>{' '}
             |{' '}
-            <Link href="/lists">
+            {/* <Link href="/lists">
               <a>Lists</a>
             </Link>{' '}
-            |{' '}
+            |{' '} */}
             <button onClick={async () => {
-                await supabase.auth.signOut();
-                router.push("/");
-              }}>
+              await supabase.auth.signOut();
+              router.push("/");
+            }}>
               <a>Sign Out</a>
             </button>
             {/* <Link href="/users">
@@ -52,7 +56,8 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
       </div>
       <footer className="text-center">
         <hr />
-        <span>&copy; Copyright {new Date().getFullYear()}</span>
+        <div>&copy; Copyright {new Date().getFullYear()}</div>
+        <div className="text-sm">Version {pkg.version}</div>
       </footer>
     </div>
   )

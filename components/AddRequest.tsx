@@ -1,15 +1,12 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { Button } from "reakit/Button";
 import { Input } from "reakit/Input";
-import { useProfileData } from "../hooks/useProfileData";
 
 
 const AddRequest = ({ id }) => {
 
     const supabase = useSupabaseClient()
-    // const user = useUser()
-    // console.log('user', user);
 
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
@@ -38,13 +35,15 @@ const AddRequest = ({ id }) => {
     }
 
     return (
-        <div className="py-3 flex flex-wrap gap-2">
+        <div>
+            <form onSubmit={addItem} className="py-3 flex flex-wrap gap-2">
             <Input
                 className="border border-slate-800 p-1"
                 placeholder="name"
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value) }}
+                required
             />
             <Input
                 className="border border-slate-800 p-1"
@@ -60,7 +59,8 @@ const AddRequest = ({ id }) => {
                 value={url}
                 onChange={(e) => { setUrl(e.target.value) }}
             />
-            <Button onClick={addItem}>Add</Button>
+            <Button type="submit">Add To Wish List</Button>
+            </form>
         </div>
     )
 }

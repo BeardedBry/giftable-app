@@ -2,15 +2,15 @@ import React from 'react'
 import Link from 'next/link'
 
 import { User } from '../interfaces'
+import { Request } from './List'
 
-type Props = {
-  data: User
-}
-
-const ListItem = ({ data }: Props) => (
-  <Link href="/users/[id]" as={`/users/${data.id}`}>
+const ListItem = ({data}: {data: Request}) => (
+  <Link href="/request/[id]" as={`/request/${data.id}`}>
     <a>
-      {data.id}: {data.name}
+      <div>
+
+      </div>
+      {data.name} -  {data.notes} - {data.url}
     </a>
   </Link>
 )
