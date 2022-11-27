@@ -197,9 +197,6 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
         Welcome {displayName}!!
         <hr className="my-6" />
         <div>
-          <h3>Lists</h3>
-
-          {}
           <>
             <TabList {...tab} aria-label="My tabs" className="flex gap-6">
               <Tab {...tab} id={profileId}>My List</Tab>

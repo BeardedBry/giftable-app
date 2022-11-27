@@ -12,7 +12,7 @@ const ListItem = ({ data }: { data: Request }) => (
           <p className="text-gray-500">Name</p>
           <p className="font-semibold">{data.name}</p>
         </div>
-          <div className="border-r px-6">
+          <div className="border-r px-6 w-36">
             <p className="text-gray-500">Notes</p>
             <p className="font-semibold">{data.notes ?? "N/A"}</p>
           </div>
