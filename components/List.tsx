@@ -1,19 +1,67 @@
 import * as React from 'react'
 import ListItem from './ListItem'
-import { User } from '../interfaces'
+import { AddRequest } from './AddRequest'
+import { useQuery } from '@tanstack/react-query'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
+
 
 type Props = {
-  items: User[]
+  id: number;
+  display_name: string;
+  profileId: number;
 }
 
-const List = ({ items }: Props) => (
-  <ul>
-    {items.map((item) => (
-      <li key={item.id}>
-        <ListItem data={item} />
-      </li>
-    ))}
-  </ul>
-)
+export type Request = {
+  id: number;
+  name: string;
+  notes: string;
+  recipient: number;
+  requested_by: number;
+  url: string;
+}
+
+const List = ({ props }: { props: Props }) => {
+
+  const { id, display_name, profileId } = props;
+  const [items, setItems] = React.useState([]);
+  const supabase = useSupabaseClient();
+
+  // id, name, url, notes, recipient, requested_by 
+
+  const query = useQuery({
+    queryKey: [id],
+    queryFn: async () => {
+
+      console.log('id', id, typeof id)
+
+      let { data: requests, error } = await supabase
+        .from('requests')
+        .select('*').eq('recipient', id)
+
+      return requests;
+    },
+  });
+
+  console.log('query', query.data)
+
+  return (
+    <div className="flex flex-col gap-3">
+      <h2 className="text-xl text-center">{display_name}'s' Wish List</h2>
+      <ul>
+        {query.data?.map((request: Request, index) => (
+          <li key={request.id} className="even:bg-slate-100 p-2 py-4">
+            <ListItem data={request} />
+          </li>
+        ))}
+      </ul>
+      <div>
+        <AddRequest id={id} />
+      </div>
+    </div>
+  )
+}
+
+// const List = ({ items }: Props) => (
+// )
 
 export default List

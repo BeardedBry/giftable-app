@@ -1,8 +1,16 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
-import { useProfileData } from "../hooks/useProfileData"
+import { useTabState, Tab, TabList, TabPanel } from "reakit/Tab";
+import {
+  useMenuState,
+  Menu,
+  MenuItem,
+  MenuButton,
+  MenuSeparator,
+} from "reakit/Menu";
 import Layout from '../components/Layout';
-import { Input, Button } from "reakit";
+import { Input, Button } from 'reakit';
+import List from '../components/List'
 import { Spinner } from "../components/Spinner";
 
 import getProfile from '../utils/get-profile';
@@ -57,15 +65,20 @@ export const getServerSideProps = async (ctx) => {
 }
 
 
-
 const ProfilePage = ({ newUser, displayName, profileId }) => {
-
 
   const supabase = useSupabaseClient();
   const user = useUser();
   const router = useRouter();
+  const tab = useTabState();
+  const menu = useMenuState();
   const [username, setUsername] = useState("");
-  const [groupsLoading, setGroupsLoading] = useState(true);
+  // const [groupIds, setGroupIds] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+
+
+  // console.log(tab.currentId);
+
 
   useEffect(() => {
     if (!displayName) {
@@ -94,16 +107,32 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       //   .select('*').in('id', groupIds);
 
       // for now since we have only 1 group:
-      let { data: group_to_profile, error } = await supabase
+      let { data: group_to_profile, error: group_to_profile_error } = await supabase
         .from('group_to_profile')
         .select('*')
 
       const profileIds = group_to_profile.map((group) => group.profile);
 
-      console.log('group_to_profile', group_to_profile);
-      console.log("profileIds", profileIds);
-      
-      
+      if (group_to_profile_error) {
+        console.log(group_to_profile_error);
+        return;
+      }
+
+      // setGroupIds(profileIds);
+
+      // get users
+
+      let { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*').in('id', profileIds);
+
+      console.log('profiles', profiles);
+      setProfiles(profiles.filter(profile => profile.id !== profileId));
+
+
+
+      // console.log('group_to_profile', group_to_profile);
+      // console.log("profileIds", profileIds);
       // console.log('groups', groups, error);
 
       // const groupId = groups[0].id;
@@ -131,7 +160,7 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
     if (error) {
       console.error(error);
-    } 
+    }
     router.reload();
   }
 
@@ -167,8 +196,32 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       <div className="container" style={{ padding: '20px 0 100px 0' }}>
         Welcome {displayName}!!
         <hr className="my-6" />
-        <h3>Friends Lists</h3>
-        {groupsLoading ? <Spinner /> : <>data</>}
+        <div>
+          <>
+            <TabList {...tab} aria-label="My tabs" className="flex gap-6">
+              <Tab {...tab} id={profileId}>My List</Tab>
+              {profiles.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
+            </TabList>
+            <TabPanel {...tab}>
+              <List props={{ display_name: displayName, id: profileId, profileId}} />
+            </TabPanel>
+            {profiles.map((profile) => (
+              <TabPanel {...tab} id={profile.id} key={profile.id}>
+                <List props={{...profile, profileId}} />
+              </TabPanel>)
+            )}
+          </>
+
+          {/* <>
+            <MenuButton {...menu}>Wish Lists</MenuButton>
+            <Menu {...menu} aria-label="Wish Lists">
+                {profiles.map((profile) => <MenuItem {...menu} id={profile.id} key={profile.id}>{profile.display_name}</MenuItem>)}
+              <MenuSeparator {...menu} />
+              <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
+            </Menu>
+          </> */}
+
+        </div>
       </div>
     </Layout >
   )
