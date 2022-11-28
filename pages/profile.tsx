@@ -126,9 +126,8 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
         .from('profiles')
         .select('*').in('id', profileIds);
 
-      console.log('profiles', profiles);
+      // console.log('profiles', profiles);
       setProfiles(profiles.filter(profile => profile.id !== profileId));
-
 
 
       // console.log('group_to_profile', group_to_profile);
@@ -146,7 +145,9 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
   }, [displayName])
 
 
-  const createProfile = async () => {
+  const createProfile = async (e) => {
+    e.preventDefault();
+
     if (username.length < 3) {
       alert("username too short");
       return;
