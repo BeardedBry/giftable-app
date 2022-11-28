@@ -3,6 +3,7 @@ import ListItem from './ListItem'
 import { AddRequest } from './AddRequest'
 import { useQuery } from '@tanstack/react-query'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { Input, Button } from 'reakit';
 
 
 type Props = {
@@ -32,8 +33,6 @@ const List = ({ props }: { props: Props }) => {
     queryKey: [id],
     queryFn: async () => {
 
-      console.log('id', id, typeof id)
-
       let { data: requests, error } = await supabase
         .from('requests')
         .select('*').eq('recipient', id)
@@ -42,7 +41,7 @@ const List = ({ props }: { props: Props }) => {
     },
   });
 
-  console.log('query', query.data)
+  // console.log('query', query.data)
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,6 +50,7 @@ const List = ({ props }: { props: Props }) => {
         {query.data?.map((request: Request, index) => (
           <li key={request.id} className="even:bg-slate-100 p-2 py-4">
             <ListItem data={request} />
+            {/* <Button className="bg-slate-300 text-sm mt-4">Remove</Button> */}
           </li>
         ))}
       </ul>
