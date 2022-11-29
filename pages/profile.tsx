@@ -12,6 +12,7 @@ import Layout from '../components/Layout';
 import { Input, Button } from 'reakit';
 import List from '../components/List'
 import { Spinner } from "../components/Spinner";
+import { AddRequest } from "../components/AddRequest";
 
 import getProfile from '../utils/get-profile';
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import { useRouter } from "next/router";
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
   const supabase = createServerSupabaseClient(ctx)
+  
   // Check if we have a session
   const {
     data: { user },
@@ -199,16 +201,16 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
         <hr className="my-6" />
         <div>
           <>
-            <TabList {...tab} aria-label="My tabs" className="flex gap-6">
+            <TabList {...tab} aria-label="Lists" className="flex gap-6">
               <Tab {...tab} id={profileId}>My List</Tab>
               {profiles.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
             </TabList>
             <TabPanel {...tab}>
-              <List props={{ display_name: displayName, id: profileId, profileId}} />
+              <List props={{ display_name: displayName, id: profileId, profileId }} />
             </TabPanel>
             {profiles.map((profile) => (
               <TabPanel {...tab} id={profile.id} key={profile.id}>
-                <List props={{...profile, profileId}} />
+                <List props={{ ...profile, profileId }} />
               </TabPanel>)
             )}
           </>

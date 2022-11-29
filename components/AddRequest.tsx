@@ -5,32 +5,38 @@ import { Button } from "reakit/Button";
 import { Input } from "reakit/Input";
 
 
-const AddRequest = ({ id }) => {
+type Request = {
+    name: string,
+    url: string,
+    notes: string,
+    requested_by: number,
+    recipient: number,
+}
 
-    const supabase = useSupabaseClient()
-    const queryClient = useQueryClient()
+
+const AddRequest = ({ id, requesterId }) => {
+
+    const supabase = useSupabaseClient();
+    const queryClient = useQueryClient();
 
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
     const [notes, setNotes] = useState("");
 
     const itemMutation = useMutation({
-        mutationFn: async () => await supabase
-            .from('requestss')
-            .insert([
-                {
-                    name: name,
-                    url: url,
-                    notes: notes,
-                    requested_by: id,
-                    recipient: id,
-                },
-            ]),
+        mutationFn: async (props: Request) => {
+            const { data, error } = await supabase
+                .from('requests')
+                .insert([
+                    props,
+                ])
+            return error ?? data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [id] })
         },
         onError: (e) => {
-            console.error(e)
+            console.error('error', e)
         }
     });
 
@@ -39,7 +45,13 @@ const AddRequest = ({ id }) => {
         <div>
             <form onSubmit={(e) => {
                 e.preventDefault()
-                itemMutation.mutate();
+                itemMutation.mutate({
+                    name: name,
+                    url: url,
+                    notes: notes,
+                    requested_by: requesterId,
+                    recipient: id,
+                });
             }} className="py-3 flex flex-wrap gap-2">
                 <Input
                     className="border border-slate-800 p-1"
