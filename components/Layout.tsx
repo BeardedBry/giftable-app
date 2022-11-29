@@ -40,7 +40,7 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
             |{' '} */}
             <button onClick={async () => {
               await supabase.auth.signOut();
-              router.push("/");
+              router.replace("/");
             }}>
               <a>Sign Out</a>
             </button>
