@@ -11,18 +11,18 @@ import {
 import Layout from '../components/Layout';
 import { Input, Button } from 'reakit';
 import List from '../components/List'
-import { Spinner } from "../components/Spinner";
-import { AddRequest } from "../components/AddRequest";
 
 import getProfile from '../utils/get-profile';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
   const supabase = createServerSupabaseClient(ctx)
-  
+
   // Check if we have a session
   const {
     data: { user },
@@ -39,8 +39,7 @@ export const getServerSideProps = async (ctx) => {
   // check if user is in users (profile) table.
   const userProfile = await getProfile(supabase, user.id)
 
-  console.log('userProfile ', userProfile);
-
+  // console.log('userProfile ', userProfile);
 
   // console.log('userProfile', userProfile)
   // new user route
@@ -73,78 +72,47 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
   const user = useUser();
   const router = useRouter();
   const tab = useTabState();
-  const menu = useMenuState();
   const [username, setUsername] = useState("");
+  // const menu = useMenuState();
   // const [groupIds, setGroupIds] = useState([]);
-  const [profiles, setProfiles] = useState([]);
+  // const [profiles, setProfiles] = useState([]);
+
+  const groupProfilesQuery = useQuery({
+    queryKey: [profileId, displayName],
+    queryFn: async () => {
+
+      const groupData = await axios.post('/api/get-group', { profileId });
+      const profilesData = groupData.data.data.filter(profile => profile.id !== profileId);
+
+      return profilesData;
+    },
+    staleTime: 60000,
+  });
+
+  // useEffect(() => {
+  //   if (!displayName) {
+  //     return;
+  //   }
+
+  //   // TODO: Optimize and secure
+  //   const readGroups = async () => {
+  //     try {
+  //       const groupData = await axios.post('/api/get-group', { profileId });
+  //       // console.log('profiles_data', groupData);
+  //       const profiles_data = groupData.data.data;
+
+  //       setProfiles(profiles_data.filter(profile => profile.id !== profileId));
+
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+
+  //   }
+
+  //   readGroups();
 
 
-  // console.log(tab.currentId);
-
-
-  useEffect(() => {
-    if (!displayName) {
-      return;
-    }
-
-    const readGroups = async () => {
-
-      // let { data: group_to_profile, error: group_to_profile_error } = await supabase
-      //   .from('group_to_profile')
-      //   .select('*').eq('profile', parseInt(profileId, 10))
-
-      // // console.log(group_to_profile);
-      // if (group_to_profile_error) {
-      //   console.error(group_to_profile_error);
-      // }
-
-      // if (!group_to_profile?.length) {
-      //   return null;
-      // }
-
-      // const groupIds = group_to_profile.map((g) => g.group)
-
-      // let { data: groups, error } = await supabase
-      //   .from('groups')
-      //   .select('*').in('id', groupIds);
-
-      // for now since we have only 1 group:
-      let { data: group_to_profile, error: group_to_profile_error } = await supabase
-        .from('group_to_profile')
-        .select('*')
-
-      const profileIds = group_to_profile.map((group) => group.profile);
-
-      if (group_to_profile_error) {
-        console.log(group_to_profile_error);
-        return;
-      }
-
-      // setGroupIds(profileIds);
-
-      // get users
-
-      let { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*').in('id', profileIds);
-
-      // console.log('profiles', profiles);
-      setProfiles(profiles.filter(profile => profile.id !== profileId));
-
-
-      // console.log('group_to_profile', group_to_profile);
-      // console.log("profileIds", profileIds);
-      // console.log('groups', groups, error);
-
-      // const groupId = groups[0].id;
-
-      // return groups;
-    }
-
-    readGroups();
-
-
-  }, [displayName])
+  // }, [displayName])
 
 
   const createProfile = async (e) => {
@@ -199,23 +167,26 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       <div className="container" style={{ padding: '20px 0 100px 0' }}>
         Welcome {displayName}!!
         <hr className="my-6" />
-        <div>
-          <>
-            <TabList {...tab} aria-label="Lists" className="flex gap-6">
-              <Tab {...tab} id={profileId}>My List</Tab>
-              {profiles.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
-            </TabList>
-            <TabPanel {...tab}>
-              <List props={{ display_name: displayName, id: profileId, profileId }} />
-            </TabPanel>
-            {profiles.map((profile) => (
-              <TabPanel {...tab} id={profile.id} key={profile.id}>
-                <List props={{ ...profile, profileId }} />
-              </TabPanel>)
-            )}
-          </>
 
-          {/* <>
+        {groupProfilesQuery.data ? (
+          <div>
+            <>
+              <TabList {...tab} aria-label="Lists" className="flex gap-6">
+                <Tab {...tab} id={profileId}>My List</Tab>
+                {groupProfilesQuery.data.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
+              </TabList>
+              <TabPanel {...tab}>
+                {/* My List */}
+                <List props={{ display_name: displayName, id: profileId, profileId }} />
+              </TabPanel>
+              {groupProfilesQuery.data.map((profile) => (
+                <TabPanel {...tab} id={profile.id} key={profile.id}>
+                  <List props={{ ...profile, profileId }} />
+                </TabPanel>)
+              )}
+            </>
+
+            {/* <>
             <MenuButton {...menu}>Wish Lists</MenuButton>
             <Menu {...menu} aria-label="Wish Lists">
                 {profiles.map((profile) => <MenuItem {...menu} id={profile.id} key={profile.id}>{profile.display_name}</MenuItem>)}
@@ -223,8 +194,12 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
               <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
             </Menu>
           </> */}
-
-        </div>
+          </div>
+        ) :groupProfilesQuery.isLoading ? (
+          <p>loading...</p>
+        ) : groupProfilesQuery.isError ? (
+          <p>Error</p>
+        ) : null}
       </div>
     </Layout >
   )
