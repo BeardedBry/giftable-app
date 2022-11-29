@@ -13,8 +13,15 @@ type Request = {
     recipient: number,
 }
 
+type AddRequestProps = {
+    id: number;
+    requesterId: number;
+    isMyList: boolean;
+    listDisplayName: string;
+}
 
-const AddRequest = ({ id, requesterId }) => {
+
+const AddRequest = ({ id, requesterId, isMyList, listDisplayName }: AddRequestProps) => {
 
     const supabase = useSupabaseClient();
     const queryClient = useQueryClient();
@@ -75,7 +82,10 @@ const AddRequest = ({ id, requesterId }) => {
                     value={url}
                     onChange={(e) => { setUrl(e.target.value) }}
                 />
-                <Button type="submit">Add To Wish List</Button>
+                <button className={`p-3 text-white rounded ${isMyList ? 'bg-green-500' : 'bg-purple-500'}`} type="submit">
+                    {isMyList ? 'Add To My Wish List' : `Add to ${listDisplayName}'s List`}
+                </button>
+                {!isMyList && <span className="text-slate-400 text-sm">Hidden from this User but everyone else can see it.</span>}
             </form>
         </div>
     )
