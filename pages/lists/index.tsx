@@ -47,7 +47,7 @@ const ListPage = ({ }) => {
                     <div className="flex flex-col gap-3">
                         <h2 className="text-xl text-center">Your Wish List</h2>
                         <div>
-                            <AddRequest id={profileId} />
+                            <AddRequest id={profileId} requesterId={profileId} />
                         </div>
                     </div>
                 )}
