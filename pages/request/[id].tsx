@@ -3,35 +3,89 @@ import { GetServerSideProps, NextApiRequest, NextApiResponse } from 'next'
 import { User } from '../../interfaces'
 import Layout from '../../components/Layout'
 import ListDetail from '../../components/ListDetail'
+import axios from 'axios'
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import { NextParsedUrlQuery } from 'next/dist/server/request-meta'
+import getProfile from '../../utils/get-profile'
+import getGroup from '../../utils/get-group'
+
 
 type Props = {
   item?: User
   errors?: string
 }
+// export const getServerSideProps = async (req: NextApiRequest, res: NextApiResponse) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res, resolvedUrl, query }:
+  { req: NextApiRequest, res: NextApiResponse, resolvedUrl, query }) => {
 
-export const getServerSideProps = async (req: NextApiRequest, res: NextApiResponse) => {
+  const supabase = createServerSupabaseClient({ req, res, resolvedUrl })
+  const { id: requestId } = query
 
-    const { id } = req.query
-    
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
     return {
-        props: {pid: id}
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
     }
+  }
+
+  const profile = await getProfile(supabase, user.id);
+  const userGroup = await getGroup(supabase, profile.id);
+
+
+  let { data: request, error } = await supabase
+    .from('requests')
+    .select('*').eq('group', userGroup.group).eq('id', requestId).single();
+
+  if (error || !request) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    }
+  }
+
+  const {
+    id,
+    name,
+    url,
+    notes,
+    recipient,
+    requested_by,
+    group,
+    purchased_by,
+    purchased_date 
+  } = request;
+
+
+  console.log('profile', profile);
+
+
+  return {
+    props: { pid: requestId }
+  }
 }
 
 const RequestedItemPage = ({ pid }) => {
-//   if (errors) {
-//     return (
-//       <Layout title="">
-//         <p>
-//           <span style={{ color: 'red' }}>Error:</span> {errors}
-//         </p>
-//       </Layout>
-//     )
-//   }
+  //   if (errors) {
+  //     return (
+  //       <Layout title="">
+  //         <p>
+  //           <span style={{ color: 'red' }}>Error:</span> {errors}
+  //         </p>
+  //       </Layout>
+  //     )
+  //   }
 
   return (
     <Layout title={'itemName | User Detail'}>
-        <p>item {pid}</p>
+      <p>item {pid}</p>
       {/* {item && <ListDetail item={item} />} */}
     </Layout>
   )

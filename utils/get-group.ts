@@ -1,18 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type Profile = {
-    id: number,
-    display_name: string,
-    auth_user: string
-  }
-
-export default async function getProfile(supabase: SupabaseClient, userId: string): Promise<Profile | undefined> {
+export default async function getProfile(supabase: SupabaseClient, profileId: number) {
     try {
-        let { data, error, status } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('auth_user', userId)
-            .single()
+        let { data , error, status } = await supabase
+            .from('group_to_profile')
+            .select('*').eq('profile', profileId).single(); //single for now since we have 1 group
 
         if (error && status !== 406) {
             console.log('status', status);

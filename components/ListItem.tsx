@@ -17,10 +17,10 @@ const ListItem = ({ data, isRequestedByAnother }: ListItemProps ) => (
           <p className="text-gray-500">Name</p>
           <p className="font-semibold">{data.name}</p>
         </div>
-        <div className="border-r px-6 w-36">
+        {/* <div className="border-r px-6 w-36">
           <p className="text-gray-500">Notes</p>
           <p className="font-semibold">{data.notes ?? "N/A"}</p>
-        </div>
+        </div> */}
         <div className="border-r px-6">
           <p className="text-gray-500">URL</p>
           <p className="font-semibold">{data.url ?? "N/A"}</p>
