@@ -72,7 +72,7 @@ const List = ({ props }: { props: Props }) => {
             return;
           }
 
-          console.log('request', request);
+          // console.log('request', request);
 
           const isRequestedByAnother = request.requested_by !== listUserId;
           const isRemovable = request.requested_by == userProfileId;
