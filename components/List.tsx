@@ -4,6 +4,8 @@ import { AddRequest } from './AddRequest'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { Input, Button } from 'reakit';
+import dynamic from 'next/dynamic'
+import 'reactjs-popup/dist/index.css';
 
 
 type Props = {
@@ -23,6 +25,8 @@ export type Request = {
   requested_by: number;
   url: string;
 }
+
+const Popup = dynamic(() => import('reactjs-popup'));
 
 const List = ({ props }: { props: Props }) => {
 
@@ -62,6 +66,14 @@ const List = ({ props }: { props: Props }) => {
 
   // console.log('query', query.data)
 
+  const PurchaseButton = () => {
+    return (
+      <Popup trigger={<button className="bg-gray-300 border text-sm p-2 rounded">🎁 Mark as Purchased</button>} position="right center">
+        <div>Popup content here !!</div>
+      </Popup>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-xl text-center">{listDisplayName}'s' Wish List</h2>
@@ -95,11 +107,12 @@ const List = ({ props }: { props: Props }) => {
                 {isPurchased ? (
                   <span className="p-2 bg-green-400">Purchased on {purchaseDate}</span>
                 ) : (
-                  <button
-                    onClick={() => { }}
-                    className="bg-gray-300 border text-sm p-2 rounded">
-                    🎁 Mark as Purchased
-                  </button>
+                  <PurchaseButton />
+                  // <button
+                  //   onClick={() => { }}
+                  //   className="bg-gray-300 border text-sm p-2 rounded">
+                  //   🎁 Mark as Purchased
+                  // </button>
                 )}
               </div>
             </li>
