@@ -12,8 +12,8 @@ import Layout from '../components/Layout';
 import { Input, Button } from 'reakit';
 import List from '../components/List'
 
-import getProfile from '../utils/get-profile';
-import { useEffect, useState } from "react";
+import { getProfileFromAuid } from '../utils/get-profile';
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -37,7 +37,7 @@ export const getServerSideProps = async (ctx) => {
     }
 
   // check if user is in users (profile) table.
-  const userProfile = await getProfile(supabase, user.id)
+  const userProfile = await getProfileFromAuid(supabase, user.id)
 
   // console.log('userProfile ', userProfile);
 
@@ -73,20 +73,18 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
   const router = useRouter();
   const tab = useTabState();
   const [username, setUsername] = useState("");
-  // const menu = useMenuState();
-  // const [groupIds, setGroupIds] = useState([]);
-  // const [profiles, setProfiles] = useState([]);
 
   const groupProfilesQuery = useQuery({
     queryKey: [profileId, displayName],
     queryFn: async () => {
 
-      const groupData = await axios.post('/api/get-group', { profileId });
+      const groupData = await axios.post('/api/get-group-profiles', { profileId });
       const profilesData = groupData.data.data.filter(profile => profile.id !== profileId);
 
       return profilesData;
     },
     staleTime: 60000,
+    // cacheTime: 25000,
   });
 
   // useEffect(() => {
@@ -169,33 +167,47 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
         <hr className="my-6" />
 
         {groupProfilesQuery.data ? (
-          <div>
-            <>
-              <TabList {...tab} aria-label="Lists" className="flex gap-6">
-                <Tab {...tab} id={profileId}>My List</Tab>
-                {groupProfilesQuery.data.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
-              </TabList>
-              <TabPanel {...tab}>
-                {/* My List */}
-                <List props={{ display_name: displayName, id: profileId, profileId }} />
-              </TabPanel>
-              {groupProfilesQuery.data.map((profile) => (
-                <TabPanel {...tab} id={profile.id} key={profile.id}>
-                  <List props={{ ...profile, profileId }} />
-                </TabPanel>)
-              )}
-            </>
+          <>
+            <div className={""}>
+              <>
+                <TabList {...tab} aria-label="Lists" className="flex gap-6">
+                  <Tab {...tab} id={profileId}>My List</Tab>
+                  {groupProfilesQuery.data.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
+                </TabList>
 
-            {/* <>
-            <MenuButton {...menu}>Wish Lists</MenuButton>
-            <Menu {...menu} aria-label="Wish Lists">
-                {profiles.map((profile) => <MenuItem {...menu} id={profile.id} key={profile.id}>{profile.display_name}</MenuItem>)}
-              <MenuSeparator {...menu} />
-              <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
-            </Menu>
-          </> */}
-          </div>
-        ) :groupProfilesQuery.isLoading ? (
+                <TabPanel {...tab}>
+                  <List props={{ display_name: displayName, id: profileId, profileId }} />
+                </TabPanel>
+                {groupProfilesQuery.data.map((profile) => (
+                  <TabPanel {...tab} id={profile.id} key={profile.id}>
+                    <List props={{ ...profile, profileId }} />
+                  </TabPanel>)
+                )}
+              </>
+            </div>
+
+            {/* <div className="">
+              <>
+                <MenuButton {...menu}>Wish Lists</MenuButton>
+                <Menu {...menu} aria-label="Wish Lists">
+                  <MenuItem {...menu} id={profileId} onClick={onMenuClick}>
+                    My List
+                  </MenuItem>
+                  {groupProfilesQuery.data.map((profile) => <MenuItem {...menu} id={profile.id} key={profile.id} onClick={onMenuClick}>
+                    {profile.display_name}
+                  </MenuItem>)}
+                  <MenuSeparator {...menu} />
+                  <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
+                </Menu>
+                {groupProfilesQuery.data.map((profile) => (
+                  <TabPanel {...menu} id={profile.id} key={profile.id}>
+                    <List props={{ ...profile, profileId }} />
+                  </TabPanel>)
+                )}
+              </>
+            </div> */}
+          </>
+        ) : groupProfilesQuery.isLoading ? (
           <p>loading...</p>
         ) : groupProfilesQuery.isError ? (
           <p>Error</p>
