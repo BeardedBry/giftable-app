@@ -1,38 +1,145 @@
 import { GetServerSideProps, NextApiRequest, NextApiResponse } from 'next'
 
-import { User } from '../../interfaces'
 import Layout from '../../components/Layout'
-import ListDetail from '../../components/ListDetail'
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import { getProfileFromAuid, getProfileFromId } from '../../utils/get-profile'
+import getGroup from '../../utils/get-group'
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-type Props = {
-  item?: User
-  errors?: string
-}
 
-export const getServerSideProps = async (req: NextApiRequest, res: NextApiResponse) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res, resolvedUrl, query }:
+  { req: NextApiRequest, res: NextApiResponse, resolvedUrl, query }) => {
 
-    const { id } = req.query
-    
+  const supabase = createServerSupabaseClient({ req, res, resolvedUrl })
+  const { id: requestId } = query
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
     return {
-        props: {pid: id}
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
     }
+  }
+
+  const profile = await getProfileFromAuid(supabase, user.id);
+  const userGroup = await getGroup(supabase, profile.id);
+
+
+  let { data: request, error } = await supabase
+    .from('requests')
+    .select('*').eq('group', userGroup.group).eq('id', requestId).single();
+
+  if (error || !request) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    }
+  }
+
+  const {
+    id,
+    name,
+    url,
+    notes,
+    recipient,
+    requested_by,
+    group,
+    purchased_by,
+    purchased_date
+  } = request;
+
+
+  const requester = await getProfileFromId(supabase, requested_by);
+  const receiver = await getProfileFromId(supabase, recipient);
+
+
+  console.log('requester', requester);
+  console.log('receiver', receiver);
+
+
+  return {
+    props: {
+      pid: requestId,
+      name,
+      url,
+      notes,
+      group,
+      purchased_by,
+      purchased_date,
+      requester: JSON.stringify(requester),
+      receiver: JSON.stringify(receiver),
+    }
+  }
 }
 
-const RequestedItemPage = ({ pid }) => {
-//   if (errors) {
-//     return (
-//       <Layout title="">
-//         <p>
-//           <span style={{ color: 'red' }}>Error:</span> {errors}
-//         </p>
-//       </Layout>
-//     )
-//   }
+const RequestedItemPage = ({
+  pid,
+  name,
+  url,
+  notes,
+  requester,
+  receiver,
+  group,
+  purchased_by,
+  purchased_date
+}) => {
+  //   if (errors) {
+  //     return (
+  //       <Layout title="">
+  //         <p>
+  //           <span style={{ color: 'red' }}>Error:</span> {errors}
+  //         </p>
+  //       </Layout>
+  //     )
+  //   }
+
+  // const urlMetaQuery = useQuery({
+  //   queryKey: [pid, url],
+  //   queryFn: async () => {
+
+  //     const metaData = await axios.post('/api/get-meta-data', { url });
+  //     // const profilesData = groupData.data.data.filter(profile => profile.id !== profileId);
+  //     console.log('metaData', metaData);
+
+  //     return metaData;
+  //   },
+  //   staleTime: 60000,
+  //   // cacheTime: 25000,
+  // });
+
+
 
   return (
     <Layout title={'itemName | User Detail'}>
-        <p>item {pid}</p>
       {/* {item && <ListDetail item={item} />} */}
+      <div className="container mx-auto" style={{ padding: '20px 0 100px 0' }}>
+        <div className="border p-3">
+          <h2 className="text-2xl md:text-3xl pb-3">{name}</h2>
+          <div>
+            {purchased_by ? (
+              <span className="text-lg">🎅🏼 Already Purchased</span>
+            ) : (
+              <span className="text-lg">😦 Not purchased yet</span>
+            )}
+            {" - "}
+            {url ? (
+              <a href={url} target="_blank" className="text-xl visited:text-purple-800 text-blue-600">
+                External Link
+              </a>
+            ) : null}
+          </div>
+          <span className="text-xs text-gray-400">{url}</span>
+        </div>
+        <hr className="my-6" />
+      </div>
     </Layout>
   )
 }
