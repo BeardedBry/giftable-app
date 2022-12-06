@@ -6,6 +6,7 @@ import { AppProps } from 'next/app';
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider } from 'reakit';
+import { ContextWrapper } from '../components/context';
 import * as system from "reakit-system-bootstrap";
 
 
@@ -22,7 +23,9 @@ function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) 
     >
       <QueryClientProvider client={queryClient}>
         <Provider unstable_system={system} >
-          <Component {...pageProps} />
+          <ContextWrapper>
+            <Component {...pageProps} />
+          </ContextWrapper>
         </Provider>
       </QueryClientProvider>
     </SessionContextProvider>
