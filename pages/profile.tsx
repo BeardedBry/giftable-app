@@ -13,10 +13,11 @@ import { Input, Button } from 'reakit';
 import List from '../components/List'
 
 import { getProfileFromAuid } from '../utils/get-profile';
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useAppContext } from "../components/context";
 
 
 export const getServerSideProps = async (ctx) => {
@@ -73,6 +74,8 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
   const router = useRouter();
   const tab = useTabState();
   const [username, setUsername] = useState("");
+  const { setData: setAppData} = useAppContext();
+
 
   const groupProfilesQuery = useQuery({
     queryKey: [profileId, displayName],
@@ -80,12 +83,14 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
       const groupData = await axios.post('/api/get-group-profiles', { profileId });
       const profilesData = groupData.data.data.filter(profile => profile.id !== profileId);
-
+      setAppData({profiles: groupData.data.data})
+      
       return profilesData;
     },
     staleTime: 60000,
     // cacheTime: 25000,
   });
+
 
   // useEffect(() => {
   //   if (!displayName) {
@@ -121,7 +126,7 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       return;
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .insert([
         { display_name: username, auth_user: user.id },

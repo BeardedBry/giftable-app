@@ -1,5 +1,4 @@
 import Layout from '../components/Layout';
-import SignIn from '../components/SignIn';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { Auth, ThemeMinimal } from '@supabase/auth-ui-react'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';

@@ -1,10 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type Profile = {
+export type Profile = {
     id: number,
     display_name: string,
     auth_user: string
-  }
+}
 
 export async function getProfileFromAuid(supabase: SupabaseClient, userId: string): Promise<Profile | undefined> {
     try {

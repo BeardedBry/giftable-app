@@ -5,7 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { Input, Button } from 'reakit';
 import dynamic from 'next/dynamic'
-import 'reactjs-popup/dist/index.css';
+import PurchaseButton from '../components/PurchaseButton';
+import RemoveButton from './RemoveButton'
 
 
 type Props = {
@@ -20,13 +21,11 @@ export type Request = {
   name: string;
   notes: string;
   purchased_by: null | number;
-  purchased_date: null | number;
+  purchased_date: null | Date;
   recipient: number;
   requested_by: number;
   url: string;
 }
-
-const Popup = dynamic(() => import('reactjs-popup'));
 
 const List = ({ props }: { props: Props }) => {
 
@@ -43,13 +42,19 @@ const List = ({ props }: { props: Props }) => {
     queryKey: [listUserId],
     queryFn: async () => {
 
+      console.log('fetching')
+
       let { data: requests, error } = await supabase
         .from('requests')
         .select('*').eq('recipient', listUserId)
 
       return requests;
     },
+    refetchOnMount: "always",
   });
+
+  // console.log('query data', query.data);
+
 
   const deleteMutation = useMutation({
     mutationFn: async (requestId: number) => await supabase
@@ -64,15 +69,22 @@ const List = ({ props }: { props: Props }) => {
     }
   });
 
-  // console.log('query', query.data)
 
-  const PurchaseButton = () => {
-    return (
-      <Popup trigger={<button className="bg-gray-300 border text-sm p-2 rounded">🎁 Mark as Purchased</button>} position="right center">
-        <div>Popup content here !!</div>
-      </Popup>
-    )
+  const markAsPurchased = async (supabase, purchaserId, itemId) => {
+
+    const { error } = await supabase
+      .from('requests')
+      .update({ purchased_by: purchaserId, purchased_date: new Date() })
+      .eq('id', itemId)
+
+    if (error) {
+      console.error(error);
+    } else {
+      queryClient.invalidateQueries({ queryKey: [listUserId] })
+    }
   }
+
+  // console.log('query', query.data)
 
   return (
     <div className="flex flex-col gap-3">
@@ -97,23 +109,23 @@ const List = ({ props }: { props: Props }) => {
               <hr className="my-1" />
               <div className="mt-2">
                 {isRemovable ? (
-                  <button
-                    onClick={() => { deleteMutation.mutate(request.id) }}
-                    className="bg-slate-300 text-sm mr-2 p-2 rounded">
-                    Remove
-                  </button>
+                  <RemoveButton action={() => { deleteMutation.mutate(request.id) }}>
+                    <p>Remove <span className="bg-green-400">{request.name}</span> from {listDisplayName}'s list?</p>
+                  </RemoveButton>
+                  // <button
+                  //   onClick={}
+                  //   className="bg-slate-300 text-sm mr-2 p-2 rounded">
+                  // </button>
                 ) : null}
 
                 {isPurchased ? (
-                  <span className="p-2 bg-green-400">Purchased on {purchaseDate}</span>
-                ) : (
-                  <PurchaseButton />
-                  // <button
-                  //   onClick={() => { }}
-                  //   className="bg-gray-300 border text-sm p-2 rounded">
-                  //   🎁 Mark as Purchased
-                  // </button>
-                )}
+                  // <span className="p-2 bg-green-400">Purchased on {purchaseDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) }</span>
+                  <span className="p-2 bg-green-400">Purchased on {purchaseDate} </span>
+                ) : !isMyList ? (
+                  <PurchaseButton action={() => markAsPurchased(supabase, userProfileId, request.id)}>
+                    <p>Have you purchased {request.name} for {listDisplayName}?</p>
+                  </PurchaseButton>
+                ) : null}
               </div>
             </li>
           )
