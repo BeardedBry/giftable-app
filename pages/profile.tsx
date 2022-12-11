@@ -72,9 +72,11 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
   const supabase = useSupabaseClient();
   const user = useUser();
   const router = useRouter();
-  const tab = useTabState();
+  // const tab = useTabState();
+  const menu = useMenuState();
   const [username, setUsername] = useState("");
-  const { setData: setAppData} = useAppContext();
+  const { data, setData: setAppData } = useAppContext();
+  const [selectedProfile, setSelectedProfile] = useState<{ auth_user?: string, display_name: string, id: number }>({ id: profileId, display_name: displayName });
 
 
   const groupProfilesQuery = useQuery({
@@ -83,39 +85,13 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
       const groupData = await axios.post('/api/get-group-profiles', { profileId });
       const profilesData = groupData.data.data.filter(profile => profile.id !== profileId);
-      setAppData({profiles: groupData.data.data})
-      
+      setAppData({ profiles: groupData.data.data })
+
       return profilesData;
     },
     staleTime: 60000,
     // cacheTime: 25000,
   });
-
-
-  // useEffect(() => {
-  //   if (!displayName) {
-  //     return;
-  //   }
-
-  //   // TODO: Optimize and secure
-  //   const readGroups = async () => {
-  //     try {
-  //       const groupData = await axios.post('/api/get-group', { profileId });
-  //       // console.log('profiles_data', groupData);
-  //       const profiles_data = groupData.data.data;
-
-  //       setProfiles(profiles_data.filter(profile => profile.id !== profileId));
-
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-
-  //   }
-
-  //   readGroups();
-
-
-  // }, [displayName])
 
 
   const createProfile = async (e) => {
@@ -136,6 +112,13 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
       console.error(error);
     }
     router.reload();
+  }
+
+
+  const menuClick = () => {
+    menu.hide();
+    const selected = groupProfilesQuery.data.find(profile => profile.id == menu.currentId);
+    setSelectedProfile(selected);
   }
 
 
@@ -165,6 +148,7 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
     )
   }
 
+
   return (
     <Layout title="Profile">
       <div className="container" style={{ padding: '20px 0 100px 0' }}>
@@ -173,44 +157,23 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
         {groupProfilesQuery.data ? (
           <>
-            <div className={""}>
-              <>
-                <TabList {...tab} aria-label="Lists" className="flex gap-6">
-                  <Tab {...tab} id={profileId}>My List</Tab>
-                  {groupProfilesQuery.data.map((profile) => <Tab {...tab} id={profile.id} key={profile.id}>{profile.display_name}</Tab>)}
-                </TabList>
-
-                <TabPanel {...tab}>
-                  <List props={{ display_name: displayName, id: profileId, profileId }} />
-                </TabPanel>
-                {groupProfilesQuery.data.map((profile) => (
-                  <TabPanel {...tab} id={profile.id} key={profile.id}>
-                    <List props={{ ...profile, profileId }} />
-                  </TabPanel>)
-                )}
-              </>
-            </div>
-
-            {/* <div className="">
+            <div className="">
               <>
                 <MenuButton {...menu}>Wish Lists</MenuButton>
                 <Menu {...menu} aria-label="Wish Lists">
-                  <MenuItem {...menu} id={profileId} onClick={onMenuClick}>
+                  <MenuItem {...menu} id={profileId} onClick={() => {
+                    setSelectedProfile({ id: profileId, display_name: displayName })
+                  }}>
                     My List
                   </MenuItem>
-                  {groupProfilesQuery.data.map((profile) => <MenuItem {...menu} id={profile.id} key={profile.id} onClick={onMenuClick}>
-                    {profile.display_name}
-                  </MenuItem>)}
-                  <MenuSeparator {...menu} />
-                  <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
+                  {groupProfilesQuery.data.map((profile) =>
+                    <MenuItem {...menu} id={profile.id} key={profile.id} onClick={menuClick} >
+                      {profile.display_name}
+                    </MenuItem>)}
                 </Menu>
-                {groupProfilesQuery.data.map((profile) => (
-                  <TabPanel {...menu} id={profile.id} key={profile.id}>
-                    <List props={{ ...profile, profileId }} />
-                  </TabPanel>)
-                )}
+                {selectedProfile && <List props={{ ...selectedProfile, profileId: profileId }} />}
               </>
-            </div> */}
+            </div>
           </>
         ) : groupProfilesQuery.isLoading ? (
           <p>loading...</p>

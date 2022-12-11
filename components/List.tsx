@@ -30,13 +30,11 @@ export type Request = {
 const List = ({ props }: { props: Props }) => {
 
   const { id: listUserId, display_name: listDisplayName, profileId: userProfileId } = props;
+
   const [items, setItems] = React.useState([]);
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient()
-
   const isMyList = listUserId === userProfileId;
-
-  // id, name, url, notes, recipient, requested_by 
 
   const query = useQuery({
     queryKey: [listUserId],
@@ -118,7 +116,7 @@ const List = ({ props }: { props: Props }) => {
                   // </button>
                 ) : null}
 
-                {isPurchased ? (
+                {isPurchased && !isMyList ? (
                   // <span className="p-2 bg-green-400">Purchased on {purchaseDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) }</span>
                   <span className="p-2 bg-green-400">Purchased on {purchaseDate} </span>
                 ) : !isMyList ? (
