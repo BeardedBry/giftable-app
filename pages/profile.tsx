@@ -151,13 +151,13 @@ const ProfilePage = ({ newUser, displayName, profileId }) => {
 
   return (
     <Layout title="Profile">
-      <div className="container" style={{ padding: '20px 0 100px 0' }}>
+      <div className="container m-auto" style={{ padding: '20px 0 100px 0' }}>
         Welcome {displayName}!!
         <hr className="my-6" />
 
         {groupProfilesQuery.data ? (
           <>
-            <div className="">
+            <div className="m-auto">
               <>
                 <MenuButton {...menu}>Wish Lists</MenuButton>
                 <Menu {...menu} aria-label="Wish Lists">

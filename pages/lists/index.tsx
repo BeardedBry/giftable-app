@@ -14,8 +14,6 @@ export const getServerSideProps = async (ctx) => {
         data: { session },
     } = await supabase.auth.getSession()
 
-    console.log(session)
-
     if (!session)
         return {
             redirect: {
