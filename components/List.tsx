@@ -27,6 +27,11 @@ export type Request = {
   url: string;
 }
 
+// function Requests({requests}){
+
+// }
+
+
 const List = ({ props }: { props: Props }) => {
 
   const { id: listUserId, display_name: listDisplayName, profileId: userProfileId } = props;
@@ -40,11 +45,11 @@ const List = ({ props }: { props: Props }) => {
     queryKey: [listUserId],
     queryFn: async () => {
 
-      console.log('fetching')
-
       let { data: requests, error } = await supabase
         .from('requests')
         .select('*').eq('recipient', listUserId)
+
+      // console.log(requests)
 
       return requests;
     },
@@ -82,61 +87,83 @@ const List = ({ props }: { props: Props }) => {
     }
   }
 
-  // console.log('query', query.data)
 
-  return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-xl text-center">{listDisplayName}'s' Wish List</h2>
-      <ul className="flex flex-col gap-2">
-        {query.data?.map((request: Request, index) => {
+  const sortedItems = () => {
 
-          if (request.requested_by !== userProfileId && listUserId === userProfileId) {
-            return;
-          }
+    if(!query.data){
+      return null;
+    }
 
-          // console.log('request', request);
+    let data;
 
-          const isRequestedByAnother = request.requested_by !== listUserId;
-          const isRemovable = request.requested_by == userProfileId;
-          const isPurchased = request.purchased_by;
-          const purchaseDate = request.purchased_date;
+    data = query.data;
 
-          return (
-            <li key={request.id} className={`even:bg-slate-100 p-2 py-4 border-2 rounded`}>
-              <ListItem data={request} isRequestedByAnother={isRequestedByAnother} />
-              <hr className="my-1" />
-              <div className="mt-2">
-                {isRemovable ? (
-                  <RemoveButton action={() => { deleteMutation.mutate(request.id) }}>
-                    <p>Remove <span className="bg-green-400">{request.name}</span> from {listDisplayName}'s list?</p>
-                  </RemoveButton>
-                  // <button
-                  //   onClick={}
-                  //   className="bg-slate-300 text-sm mr-2 p-2 rounded">
-                  // </button>
-                ) : null}
+    if (!isMyList) {
+      // data.filter((request: Request) => (request.requested_by == userProfileId && listUserId === userProfileId))
+      data.sort((a: Request, b: Request) => {
+        return a.purchased_by ?? 0 - b.purchased_by ?? 0;
+      })
+    }
 
-                {isPurchased && !isMyList ? (
-                  // <span className="p-2 bg-green-400">Purchased on {purchaseDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) }</span>
-                  <span className="p-2 bg-green-400">Purchased on {purchaseDate} </span>
-                ) : !isMyList ? (
-                  <PurchaseButton action={() => markAsPurchased(supabase, userProfileId, request.id)}>
-                    <p>Have you purchased {request.name} for {listDisplayName}?</p>
-                  </PurchaseButton>
-                ) : null}
-              </div>
-            </li>
-          )
-        })}
-      </ul>
-      <div>
-        <AddRequest id={listUserId} requesterId={userProfileId} isMyList={isMyList} listDisplayName={listDisplayName} />
+    return data;
+  }
+    
+
+    sortedItems();
+
+    // console.log('query', query.data)
+
+    return (
+      <div className="flex flex-col gap-3">
+        <h2 className="text-xl text-center">{listDisplayName}'s' Wish List</h2>
+        <ul className="flex flex-col gap-2">
+          {sortedItems()?.map((request: Request, index) => {
+
+            if (request.requested_by !== userProfileId && listUserId === userProfileId) {
+              return;
+            }
+            
+            const isRequestedByAnother = request.requested_by !== listUserId;
+            const isRemovable = request.requested_by == userProfileId;
+            const isPurchased = request.purchased_by;
+            const purchaseDate = request.purchased_date;
+
+            return (
+              <li key={request.id} className={`even:bg-slate-100 p-2 py-4 border-2 rounded`}>
+                <ListItem data={request} isRequestedByAnother={isRequestedByAnother} />
+                <hr className="my-1" />
+                <div className="mt-2">
+                  {isRemovable ? (
+                    <RemoveButton action={() => { deleteMutation.mutate(request.id) }}>
+                      <p>Remove <span className="bg-green-400">{request.name}</span> from {listDisplayName}'s list?</p>
+                    </RemoveButton>
+                    // <button
+                    //   onClick={}
+                    //   className="bg-slate-300 text-sm mr-2 p-2 rounded">
+                    // </button>
+                  ) : null}
+
+                  {isPurchased && !isMyList ? (
+                    // <span className="p-2 bg-green-400">Purchased on {purchaseDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) }</span>
+                    <span className="p-2 bg-green-400">Purchased on {purchaseDate} </span>
+                  ) : !isMyList ? (
+                    <PurchaseButton action={() => markAsPurchased(supabase, userProfileId, request.id)}>
+                      <p>Have you purchased {request.name} for {listDisplayName}?</p>
+                    </PurchaseButton>
+                  ) : null}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+        <div>
+          <AddRequest id={listUserId} requesterId={userProfileId} isMyList={isMyList} listDisplayName={listDisplayName} />
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-// const List = ({ items }: Props) => (
-// )
+  // const List = ({ items }: Props) => (
+  // )
 
-export default List
+  export default List

@@ -41,6 +41,9 @@ const AddRequest = ({ id, requesterId, isMyList, listDisplayName }: AddRequestPr
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [id] })
+            setName("");
+            setUrl("");
+            setNotes("");
         },
         onError: (e) => {
             console.error('error', e)

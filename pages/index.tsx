@@ -40,7 +40,7 @@ const IndexPage = ( ) => {
 
   return (
     <Layout title="Home">
-      <div className="container" style={{ padding: '20px 0 100px 0' }}>
+      <div className="container m-auto" style={{ padding: '20px 0 100px 0' }}>
         <div className="max-w-md mx-auto">
         <Auth
             supabaseClient={supabase}
