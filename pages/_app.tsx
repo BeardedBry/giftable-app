@@ -22,7 +22,8 @@ function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) 
       initialSession={pageProps.initialSession}
     >
       <QueryClientProvider client={queryClient}>
-        <Provider unstable_system={system} >
+        {/* <Provider unstable_system={system} > */}
+        <Provider>
           <ContextWrapper>
             <Component {...pageProps} />
           </ContextWrapper>

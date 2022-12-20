@@ -73,11 +73,11 @@ const List = ({ props }: { props: Props }) => {
   });
 
 
-  const markAsPurchased = async (supabase, purchaserId, itemId) => {
+  const markAsPurchased = async (itemId) => {
 
     const { error } = await supabase
       .from('requests')
-      .update({ purchased_by: purchaserId, purchased_date: new Date() })
+      .update({ purchased_by: userProfileId, purchased_date: new Date() })
       .eq('id', itemId)
 
     if (error) {
@@ -122,11 +122,11 @@ const List = ({ props }: { props: Props }) => {
             if (request.requested_by !== userProfileId && listUserId === userProfileId) {
               return;
             }
-            
+
             const isRequestedByAnother = request.requested_by !== listUserId;
             const isRemovable = request.requested_by == userProfileId;
-            const isPurchased = request.purchased_by;
             const purchaseDate = request.purchased_date;
+            const showPurchased = request.purchased_by && !isMyList;
 
             return (
               <li key={request.id} className={`even:bg-slate-100 p-2 py-4 border-2 rounded`}>
@@ -137,17 +137,12 @@ const List = ({ props }: { props: Props }) => {
                     <RemoveButton action={() => { deleteMutation.mutate(request.id) }}>
                       <p>Remove <span className="bg-green-400">{request.name}</span> from {listDisplayName}'s list?</p>
                     </RemoveButton>
-                    // <button
-                    //   onClick={}
-                    //   className="bg-slate-300 text-sm mr-2 p-2 rounded">
-                    // </button>
                   ) : null}
 
-                  {isPurchased && !isMyList ? (
-                    // <span className="p-2 bg-green-400">Purchased on {purchaseDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) }</span>
+                  { showPurchased ? (
                     <span className="p-2 bg-green-400">Purchased on {purchaseDate} </span>
                   ) : !isMyList ? (
-                    <PurchaseButton action={() => markAsPurchased(supabase, userProfileId, request.id)}>
+                    <PurchaseButton action={() => markAsPurchased(request.id)}>
                       <p>Have you purchased {request.name} for {listDisplayName}?</p>
                     </PurchaseButton>
                   ) : null}
@@ -157,7 +152,7 @@ const List = ({ props }: { props: Props }) => {
           })}
         </ul>
         <div>
-          <AddRequest id={listUserId} requesterId={userProfileId} isMyList={isMyList} listDisplayName={listDisplayName} />
+          <AddRequest listOwnerId={listUserId} requesterId={userProfileId} listDisplayName={listDisplayName} />
         </div>
       </div>
     )
